@@ -5,22 +5,17 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Pokemarket</title>
 <style>
-  /* Reset & alapok */
   * { margin:0; padding:0; box-sizing:border-box; }
   body { font-family: 'Arial', sans-serif; background:#f0f2f5; display:flex; flex-direction:column; align-items:center; min-height:100vh; }
 
-  /* Header */
   header { background:#ffcc00; width:100%; text-align:center; padding:20px 0; font-size:2em; font-weight:bold; position:relative; }
   #onlineUsers { position:absolute; right:20px; top:50%; transform:translateY(-50%); font-size:0.8em; color:#333; }
 
-  /* Logó */
   .logo { max-width:200px; margin:0 auto 10px; display:block; }
 
-  /* Kereső */
   .search { margin:20px; text-align:center; }
   .search input { width:250px; padding:8px; font-size:1em; border-radius:5px; border:1px solid #ccc; }
 
-  /* Kártyák */
   .card-list { display:flex; flex-wrap:wrap; justify-content:center; gap:20px; margin:20px; }
   .card { background:#fff; border-radius:15px; padding:15px; width:220px; text-align:center; box-shadow:0 4px 10px rgba(0,0,0,0.2); transition:transform 0.2s; }
   .card:hover { transform:scale(1.05); }
@@ -30,31 +25,28 @@
   .card button { margin-top:10px; padding:8px 15px; background:#ff6600; color:#fff; border:none; border-radius:8px; cursor:pointer; transition:background 0.2s; }
   .card button:hover { background:#e65500; }
 
-  /* Kosár */
   .cart { position:fixed; top:20px; left:20px; background:#fff; padding:15px; border-radius:10px; box-shadow:0 2px 10px rgba(0,0,0,0.2); width:200px; }
   .cart h3 { margin-bottom:10px; }
   .cart ul { list-style:none; max-height:200px; overflow-y:auto; margin-bottom:10px; }
   .cart button { width:100%; }
 
-  /* Admin link */
   .admin-link { position:fixed; bottom:20px; right:20px; background:#333; color:#fff; padding:8px 12px; border-radius:5px; text-decoration:none; }
 
-  /* Admin oldal */
   .admin-page { max-width:600px; margin:50px auto; background:#fff; padding:20px; border-radius:15px; box-shadow:0 4px 10px rgba(0,0,0,0.2);}
   .admin-page input, .admin-page button { margin:5px 0; padding:8px; width:100%; border-radius:5px; border:1px solid #ccc; }
   .admin-page button { background:#ff6600; color:#fff; border:none; cursor:pointer; transition:background 0.2s; }
   .admin-page button:hover { background:#e65500; }
-
 </style>
 </head>
 <body>
 
 <header>
-  Pokemarket
+  pokemarket
   <span id="onlineUsers">0 users online</span>
 </header>
 
-<img src="https://sandbox:/mnt/data/a_clean_white_background_graphic_logo_illustration.png" alt="Pokemarket Logo" class="logo">
+<!-- Frissített logó -->
+<img src="pokemarket_logo.png" alt="Pokemarket Logo" class="logo">
 
 <div class="search">
   <input type="text" id="searchInput" placeholder="Keresés kártya név vagy set szerint...">
@@ -70,7 +62,6 @@
 
 <a href="#admin" class="admin-link">Admin</a>
 
-<!-- Admin oldal -->
 <div id="admin" class="admin-page" style="display:none;">
   <h2>Admin felület</h2>
   <input type="password" id="adminPass" placeholder="Jelszó">
@@ -90,7 +81,6 @@
 </div>
 
 <script>
-  // Kártya adatok
   let initialCards = [
     {name:"Pikachu", set:"Base", price:1000, desc:"Villám erejű kis Pokémon", img:"https://assets.pokemon.com/assets/cms2/img/cards/web/SM/SM01/SM01_EN_25.png"},
     {name:"Charizard", set:"Base", price:15000, desc:"Tűzlehelet királya", img:"https://assets.pokemon.com/assets/cms2/img/cards/web/XY/XY1/XY1_EN_6.png"},
@@ -143,7 +133,6 @@
   renderCards();
   renderCart();
 
-  // Checkout
   document.getElementById('checkoutBtn').addEventListener('click', ()=>{
     if(cart.length===0){ alert("A kosár üres!"); return; }
     let info = prompt("Add meg a neved és email címed (pl. Név,email):");
@@ -201,22 +190,19 @@
     } else alert("Minden mezőt ki kell tölteni!");
   });
 
-  // Admin link scroll
   document.querySelector('.admin-link').addEventListener('click', e=>{
     e.preventDefault();
     adminDiv.style.display="block";
     adminDiv.scrollIntoView();
   });
 
-  // Online users szimuláció
   const onlineEl = document.getElementById('onlineUsers');
   function updateOnline(){
-    const count = Math.floor(Math.random()*50)+1; // 1-50 felhasználó
+    const count = Math.floor(Math.random()*50)+1;
     onlineEl.textContent = count+" users online";
   }
   setInterval(updateOnline, 5000);
   updateOnline();
-
 </script>
 </body>
 </html>
