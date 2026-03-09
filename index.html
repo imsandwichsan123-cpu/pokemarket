@@ -19,12 +19,22 @@ padding:20px;
 text-align:center;
 }
 
+.logo{
+height:90px;
+}
+
 .topbar{
 display:flex;
 justify-content:space-between;
+align-items:center;
 padding:10px 20px;
 background:#3b4cca;
 color:white;
+}
+
+.topbar input{
+padding:10px;
+width:200px;
 }
 
 .cards{
@@ -37,9 +47,14 @@ padding:20px;
 .card{
 background:white;
 padding:15px;
-border-radius:10px;
-box-shadow:0 5px 15px rgba(0,0,0,0.2);
+border-radius:12px;
+box-shadow:0 6px 20px rgba(0,0,0,0.2);
 text-align:center;
+transition:0.3s;
+}
+
+.card:hover{
+transform:scale(1.05);
 }
 
 .card img{
@@ -64,13 +79,13 @@ color:white;
 position:fixed;
 right:0;
 top:0;
-width:320px;
+width:340px;
 height:100%;
 background:white;
 padding:20px;
 overflow:auto;
 display:none;
-box-shadow:-5px 0 15px rgba(0,0,0,0.3);
+box-shadow:-5px 0 20px rgba(0,0,0,0.3);
 }
 
 .adminPanel{
@@ -82,13 +97,8 @@ height:100%;
 background:#222;
 color:white;
 padding:20px;
-overflow:auto;
 display:none;
-}
-
-input{
-padding:10px;
-margin:5px;
+overflow:auto;
 }
 
 .review{
@@ -96,6 +106,20 @@ background:white;
 padding:10px;
 margin:10px;
 border-radius:8px;
+box-shadow:0 3px 10px rgba(0,0,0,0.2);
+}
+
+textarea{
+width:300px;
+height:60px;
+}
+
+.stats{
+background:white;
+margin:20px;
+padding:15px;
+border-radius:10px;
+box-shadow:0 3px 10px rgba(0,0,0,0.2);
 }
 
 </style>
@@ -105,18 +129,25 @@ border-radius:8px;
 <body>
 
 <header>
-<h1>PokeMarket</h1>
+
+<img src="logo.png" class="logo">
+
 <p>Pokemon kártya webshop</p>
+
 </header>
 
 <div class="topbar">
 
-<input id="search" placeholder="Keresés..." onkeyup="searchCards()">
+<input id="search" placeholder="Kártya keresése..." onkeyup="searchCards()">
 
 <div>
+
 🛒 <span id="cartCount">0</span>
+
 <button onclick="toggleCart()">Kosár</button>
+
 <button onclick="openAdmin()">Admin</button>
+
 </div>
 
 </div>
@@ -137,17 +168,20 @@ border-radius:8px;
 
 <div class="adminPanel" id="adminPanel">
 
-<h2>Admin</h2>
+<h2>Admin panel</h2>
 
 <input id="adminPass" placeholder="jelszó">
+
 <button onclick="loginAdmin()">Belépés</button>
 
 <div id="adminControls" style="display:none">
 
-<h3>Új kártya</h3>
+<h3>Új kártya hozzáadása</h3>
 
 <input id="cardName" placeholder="név">
+
 <input id="cardPrice" placeholder="ár">
+
 <input id="cardImg" placeholder="kép link">
 
 <button onclick="addCard()">Hozzáadás</button>
@@ -156,7 +190,17 @@ border-radius:8px;
 
 </div>
 
-<h2 style="padding-left:20px">⭐ Értékelések</h2>
+<div class="stats">
+
+<h2>📊 Ár statisztika</h2>
+
+<p>Összes kártya: <span id="statCards"></span></p>
+
+<p>Átlag ár: <span id="avgPrice"></span> Ft</p>
+
+</div>
+
+<h2 style="padding-left:20px">⭐ Vásárlói értékelések</h2>
 
 <div id="reviews"></div>
 
@@ -208,6 +252,8 @@ container.innerHTML+=`
 `
 
 })
+
+updateStats()
 
 }
 
@@ -295,7 +341,7 @@ let price=document.getElementById("cardPrice").value
 
 let img=document.getElementById("cardImg").value
 
-cards.push({name:name,price:price,img:img})
+cards.push({name:name,price:parseInt(price),img:img})
 
 displayCards(cards)
 
@@ -322,6 +368,18 @@ reviews.forEach(r=>{
 container.innerHTML+=`<div class="review">⭐ ${r}</div>`
 
 })
+
+}
+
+function updateStats(){
+
+document.getElementById("statCards").innerText=cards.length
+
+let total=0
+
+cards.forEach(c=>total+=c.price)
+
+document.getElementById("avgPrice").innerText=Math.round(total/cards.length)
 
 }
 
