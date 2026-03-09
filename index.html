@@ -1,45 +1,86 @@
 <!DOCTYPE html>
-<html>
-
+<html lang="hu">
 <head>
-
-<title>PokeMarket</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>pokemarket</title>
 
 <style>
 
-body{
-font-family:Arial;
+*{
 margin:0;
-background:#f4f4f4;
+padding:0;
+box-sizing:border-box;
+font-family:Arial;
 }
 
-header{
-background:#ffcb05;
-padding:20px;
+body{
+background:#f0f2f5;
 text-align:center;
 }
 
-.topbar{
-display:flex;
-justify-content:space-between;
-padding:10px 20px;
-background:#3b4cca;
-color:white;
+/* HEADER */
+
+header{
+background:#ffcc00;
+padding:20px;
+font-size:32px;
+font-weight:bold;
+position:relative;
 }
 
-.cards{
-display:grid;
-grid-template-columns:repeat(auto-fill,minmax(220px,1fr));
-gap:20px;
-padding:20px;
+#onlineUsers{
+position:absolute;
+right:20px;
+top:25px;
+font-size:14px;
+}
+
+#visitorCount{
+position:absolute;
+left:20px;
+top:25px;
+font-size:14px;
+}
+
+.logo{
+width:180px;
+margin:20px auto;
+display:block;
+}
+
+.tagline{
+font-style:italic;
+color:#555;
+margin-bottom:20px;
+}
+
+/* SEARCH */
+
+.search input{
+padding:10px;
+width:260px;
+border-radius:8px;
+border:1px solid #ccc;
+}
+
+/* CARDS */
+
+.card-list{
+display:flex;
+flex-wrap:wrap;
+justify-content:center;
+gap:25px;
+padding:30px;
 }
 
 .card{
 background:white;
+width:220px;
 padding:15px;
-border-radius:10px;
-box-shadow:0 5px 15px rgba(0,0,0,0.2);
-text-align:center;
+border-radius:15px;
+box-shadow:0 5px 15px rgba(0,0,0,0.15);
+position:relative;
 }
 
 .card img{
@@ -47,161 +88,268 @@ width:100%;
 border-radius:10px;
 }
 
-button{
-padding:10px;
-border:none;
-border-radius:6px;
-cursor:pointer;
-margin-top:5px;
+.card h3{
+margin:10px 0;
+}
+
+.price{
+font-weight:bold;
+margin:5px 0;
 }
 
 .buy{
-background:#3b4cca;
+background:#ff6600;
 color:white;
+border:none;
+padding:8px 12px;
+border-radius:8px;
+cursor:pointer;
 }
 
-.cartPanel{
+/* BADGE */
+
+.badge{
+position:absolute;
+top:10px;
+left:10px;
+background:red;
+color:white;
+font-size:12px;
+padding:4px 6px;
+border-radius:5px;
+}
+
+/* STARS */
+
+.stars{
+color:gold;
+margin:5px 0;
+cursor:pointer;
+}
+
+/* CART */
+
+.cartButton{
 position:fixed;
-right:0;
-top:0;
-width:320px;
-height:100%;
+top:20px;
+right:20px;
+background:#ff6600;
+color:white;
+padding:10px;
+border:none;
+border-radius:10px;
+cursor:pointer;
+}
+
+.cartPopup{
+position:fixed;
+top:70px;
+right:20px;
 background:white;
-padding:20px;
-overflow:auto;
+width:260px;
+padding:15px;
+border-radius:10px;
+box-shadow:0 5px 20px rgba(0,0,0,0.3);
 display:none;
-box-shadow:-5px 0 15px rgba(0,0,0,0.3);
+}
+
+.cartPopup ul{
+list-style:none;
+}
+
+.cartPopup li{
+margin:8px 0;
+display:flex;
+justify-content:space-between;
+}
+
+.cartPopup button{
+margin-left:3px;
+}
+
+/* ADMIN */
+
+.admin{
+position:fixed;
+bottom:20px;
+right:20px;
+background:#333;
+color:white;
+padding:8px;
+border-radius:6px;
+cursor:pointer;
 }
 
 .adminPanel{
-position:fixed;
-left:0;
-top:0;
-width:320px;
-height:100%;
-background:#222;
-color:white;
-padding:20px;
-overflow:auto;
 display:none;
-}
-
-input{
-padding:10px;
-margin:5px;
-}
-
-.review{
 background:white;
-padding:10px;
-margin:10px;
-border-radius:8px;
+padding:20px;
+margin:40px auto;
+width:300px;
+border-radius:10px;
+box-shadow:0 5px 15px rgba(0,0,0,0.2);
+}
+
+.adminPanel input{
+width:100%;
+padding:8px;
+margin:5px 0;
 }
 
 </style>
-
 </head>
 
 <body>
 
 <header>
-<h1>PokeMarket</h1>
-<p>Pokemon kártya webshop</p>
+pokemarket
+<span id="visitorCount"></span>
+<span id="onlineUsers"></span>
 </header>
 
-<div class="topbar">
+<img src="pokemarket_logo.png" class="logo">
 
-<input id="search" placeholder="Keresés..." onkeyup="searchCards()">
+<p class="tagline">Where Cards Come to Life!</p>
 
-<div>
-🛒 <span id="cartCount">0</span>
-<button onclick="toggleCart()">Kosár</button>
-<button onclick="openAdmin()">Admin</button>
+<div class="search">
+<input id="search" placeholder="Search card...">
 </div>
 
+<div class="card-list" id="cards"></div>
+
+<button class="cartButton" onclick="toggleCart()">
+Cart 🛒 (<span id="cartCount">0</span>)
+</button>
+
+<div class="cartPopup" id="cartPopup">
+
+<h3>Kosár</h3>
+
+<ul id="cartItems"></ul>
+
+<p>Total: <span id="totalPrice">0</span> Ft</p>
+
+<button onclick="checkout()">Checkout</button>
+
 </div>
 
-<div id="cards" class="cards"></div>
-
-<div class="cartPanel" id="cartPanel">
-
-<h2>Kosár</h2>
-
-<div id="cartItems"></div>
-
-<h3 id="totalPrice"></h3>
-
-<button onclick="checkout()">Rendelés</button>
-
-</div>
+<div class="admin" onclick="toggleAdmin()">Admin</div>
 
 <div class="adminPanel" id="adminPanel">
 
-<h2>Admin</h2>
+<h3>Add card</h3>
 
-<input id="adminPass" placeholder="jelszó">
-<button onclick="loginAdmin()">Belépés</button>
+<input id="name" placeholder="name">
+<input id="price" placeholder="price">
+<input id="img" placeholder="image url">
 
-<div id="adminControls" style="display:none">
-
-<h3>Új kártya</h3>
-
-<input id="cardName" placeholder="név">
-<input id="cardPrice" placeholder="ár">
-<input id="cardImg" placeholder="kép link">
-
-<button onclick="addCard()">Hozzáadás</button>
-
-</div>
-
-</div>
-
-<h2 style="padding-left:20px">⭐ Értékelések</h2>
-
-<div id="reviews"></div>
-
-<div style="padding:20px">
-
-<textarea id="reviewText"></textarea>
-<br>
-<button onclick="addReview()">Értékelés küldése</button>
+<button onclick="addCard()">Add</button>
 
 </div>
 
 <script>
 
-let cards=[
+/* VISITORS */
 
-{name:"Charizard",price:25000,img:"https://images.pokemontcg.io/base1/4.png"},
+let visits = localStorage.getItem("visits") || 0
+visits++
+localStorage.setItem("visits",visits)
 
-{name:"Pikachu",price:5000,img:"https://images.pokemontcg.io/base1/58.png"},
+document.getElementById("visitorCount").innerText =
+"Visitors: "+visits
 
-{name:"Mewtwo",price:15000,img:"https://images.pokemontcg.io/base1/10.png"}
+/* ONLINE USERS */
+
+function updateOnline(){
+
+let num = Math.floor(Math.random()*40)+5
+
+document.getElementById("onlineUsers").innerText =
+"Online: "+num
+
+}
+
+setInterval(updateOnline,4000)
+updateOnline()
+
+/* CARDS */
+
+let cards = [
+
+{
+name:"Pikachu",
+price:1000,
+img:"https://images.pokemontcg.io/base1/58.png",
+popular:true,
+rating:4
+},
+
+{
+name:"Charizard",
+price:15000,
+img:"https://images.pokemontcg.io/base1/4.png",
+popular:true,
+rating:5
+},
+
+{
+name:"Bulbasaur",
+price:1200,
+img:"https://images.pokemontcg.io/base1/44.png",
+popular:false,
+rating:3
+}
 
 ]
 
 let cart=[]
-let reviews=[]
 
-function displayCards(list){
+function renderCards(filter=""){
 
 let container=document.getElementById("cards")
-
 container.innerHTML=""
 
-list.forEach((card,i)=>{
+cards
+.filter(c=>c.name.toLowerCase().includes(filter.toLowerCase()))
+.forEach((card,i)=>{
+
+let stars=""
+
+for(let s=1;s<=5;s++){
+
+if(s<=card.rating)
+stars+="★"
+else
+stars+="☆"
+
+}
+
+let badge = card.popular ?
+"<div class='badge'>🔥 Popular</div>" : ""
 
 container.innerHTML+=`
 
 <div class="card">
 
+${badge}
+
 <img src="${card.img}">
 
 <h3>${card.name}</h3>
 
-<p>${card.price} Ft</p>
+<div class="stars"
+onclick="rate(${i})">
+${stars}
+</div>
 
-<button class="buy" onclick="addCart(${i})">Kosárba</button>
+<div class="price">
+${card.price} Ft
+</div>
+
+<button class="buy"
+onclick="addToCart(${i})">
+Buy
+</button>
 
 </div>
 
@@ -211,124 +359,135 @@ container.innerHTML+=`
 
 }
 
-function addCart(i){
+renderCards()
 
-cart.push(cards[i])
+/* SEARCH */
 
-document.getElementById("cartCount").innerText=cart.length
+document.getElementById("search")
+.addEventListener("input",e=>{
 
-updateCart()
-
-}
-
-function updateCart(){
-
-let container=document.getElementById("cartItems")
-
-container.innerHTML=""
-
-let total=0
-
-cart.forEach(c=>{
-
-container.innerHTML+=`<p>${c.name} - ${c.price} Ft</p>`
-
-total+=c.price
+renderCards(e.target.value)
 
 })
 
-document.getElementById("totalPrice").innerText="Összesen: "+total+" Ft"
-
-}
+/* CART */
 
 function toggleCart(){
 
-let panel=document.getElementById("cartPanel")
+let cart=document.getElementById("cartPopup")
 
-panel.style.display=panel.style.display=="block"?"none":"block"
+cart.style.display =
+cart.style.display=="block"
+? "none":"block"
+
+}
+
+function addToCart(i){
+
+let item=cart.find(c=>c.name==cards[i].name)
+
+if(item)
+item.qty++
+else
+cart.push({...cards[i],qty:1})
+
+renderCart()
+
+}
+
+function renderCart(){
+
+let list=document.getElementById("cartItems")
+let total=0
+
+list.innerHTML=""
+
+cart.forEach((c,i)=>{
+
+total+=c.price*c.qty
+
+list.innerHTML+=`
+
+<li>
+
+${c.name} x${c.qty}
+
+<div>
+
+<button onclick="c.qty--;renderCart()">-</button>
+
+<button onclick="c.qty++;renderCart()">+</button>
+
+<button onclick="cart.splice(${i},1);renderCart()">x</button>
+
+</div>
+
+</li>
+
+`
+
+})
+
+document.getElementById("totalPrice").innerText=total
+
+document.getElementById("cartCount").innerText=
+cart.reduce((a,b)=>a+b.qty,0)
 
 }
 
 function checkout(){
 
-alert("Rendelés elküldve! Fizetés banki utalással.")
+alert("Order sent! Pay by bank transfer.")
+
+cart=[]
+
+renderCart()
 
 }
 
-function searchCards(){
+/* RATING */
 
-let s=document.getElementById("search").value.toLowerCase()
+function rate(i){
 
-let filtered=cards.filter(c=>c.name.toLowerCase().includes(s))
+cards[i].rating=
 
-displayCards(filtered)
+Math.floor(Math.random()*5)+1
 
-}
-
-function openAdmin(){
-
-document.getElementById("adminPanel").style.display="block"
+renderCards()
 
 }
 
-function loginAdmin(){
+/* ADMIN */
 
-let pass=document.getElementById("adminPass").value
+function toggleAdmin(){
 
-if(pass=="pokemonadmin"){
+let a=document.getElementById("adminPanel")
 
-document.getElementById("adminControls").style.display="block"
-
-}else{
-
-alert("Hibás jelszó")
-
-}
+a.style.display=
+a.style.display=="block"
+?"none":"block"
 
 }
 
 function addCard(){
 
-let name=document.getElementById("cardName").value
+let name=document.getElementById("name").value
+let price=document.getElementById("price").value
+let img=document.getElementById("img").value
 
-let price=document.getElementById("cardPrice").value
-
-let img=document.getElementById("cardImg").value
-
-cards.push({name:name,price:price,img:img})
-
-displayCards(cards)
-
-}
-
-function addReview(){
-
-let text=document.getElementById("reviewText").value
-
-reviews.push(text)
-
-displayReviews()
-
-}
-
-function displayReviews(){
-
-let container=document.getElementById("reviews")
-
-container.innerHTML=""
-
-reviews.forEach(r=>{
-
-container.innerHTML+=`<div class="review">⭐ ${r}</div>`
-
+cards.push({
+name,
+price,
+img,
+popular:false,
+rating:3
 })
 
-}
+renderCards()
 
-displayCards(cards)
+}
 
 </script>
 
 </body>
-
 </html>
