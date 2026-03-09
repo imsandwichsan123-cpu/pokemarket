@@ -2,7 +2,7 @@
 <html lang="hu">
 <head>
 <meta charset="UTF-8">
-<title>PokeMarket V2</title>
+<title>PokeMarket ULTRA</title>
 
 <style>
 
@@ -27,25 +27,26 @@ font-weight:bold;
 color:#38bdf8;
 }
 
-nav button{
-margin-left:10px;
-padding:8px 15px;
+button{
+cursor:pointer;
 border:none;
-border-radius:5px;
+padding:8px 15px;
+border-radius:6px;
 background:#38bdf8;
+margin-left:5px;
 }
 
 .container{
 padding:40px;
 }
 
-.search{
-margin-bottom:30px;
+.searchBar{
+margin-bottom:25px;
 }
 
-.search input{
+input,select{
 padding:10px;
-width:250px;
+margin-right:10px;
 }
 
 .cards{
@@ -59,13 +60,13 @@ background:#1e293b;
 border-radius:15px;
 padding:15px;
 text-align:center;
-transition:0.3s;
 cursor:pointer;
+transition:0.3s;
 }
 
 .card:hover{
 transform:scale(1.05);
-box-shadow:0 0 15px #38bdf8;
+box-shadow:0 0 20px #38bdf8;
 }
 
 .card img{
@@ -79,22 +80,19 @@ font-size:18px;
 }
 
 .rarity{
-font-size:14px;
 color:#facc15;
+font-size:14px;
 }
 
 .cart{
 position:fixed;
 right:0;
 top:0;
-height:100%;
 width:320px;
+height:100%;
 background:#020617;
 padding:20px;
 overflow:auto;
-}
-
-.hidden{
 display:none;
 }
 
@@ -105,16 +103,16 @@ left:0;
 width:100%;
 height:100%;
 background:rgba(0,0,0,0.7);
-display:flex;
+display:none;
 justify-content:center;
 align-items:center;
 }
 
 .modalContent{
 background:#1e293b;
-padding:30px;
+padding:25px;
 border-radius:10px;
-width:350px;
+width:340px;
 text-align:center;
 }
 
@@ -122,12 +120,7 @@ text-align:center;
 background:#020617;
 padding:20px;
 margin-top:40px;
-}
-
-input{
-padding:10px;
-margin:5px;
-width:90%;
+display:none;
 }
 
 </style>
@@ -139,26 +132,31 @@ width:90%;
 
 <div class="logo">PokeMarket</div>
 
-<nav>
-
+<div>
 <button onclick="toggleCart()">Kosár</button>
 <button onclick="openAdmin()">Admin</button>
-
-</nav>
+</div>
 
 </header>
 
 <div class="container">
 
-<div class="search">
+<div class="searchBar">
 
 <input id="search" placeholder="Keresés..." oninput="renderCards()">
+
+<select id="rarityFilter" onchange="renderCards()">
+<option value="">Minden ritkaság</option>
+<option>Common</option>
+<option>Rare</option>
+<option>Ultra Rare</option>
+</select>
 
 </div>
 
 <div class="cards" id="cards"></div>
 
-<div class="admin hidden" id="adminPanel">
+<div class="admin" id="adminPanel">
 
 <h2>Admin Panel</h2>
 
@@ -167,6 +165,7 @@ width:90%;
 <input id="year" placeholder="Év">
 <input id="rarity" placeholder="Ritkaság">
 <input id="img" placeholder="Kép URL">
+<input id="desc" placeholder="Leírás">
 
 <button onclick="addCard()">Kártya hozzáadása</button>
 
@@ -176,7 +175,7 @@ width:90%;
 
 </div>
 
-<div class="cart hidden" id="cart">
+<div class="cart" id="cart">
 
 <h2>Kosár</h2>
 
@@ -186,7 +185,7 @@ width:90%;
 
 </div>
 
-<div class="modal hidden" id="cardModal">
+<div class="modal" id="cardModal">
 
 <div class="modalContent">
 
@@ -198,19 +197,19 @@ width:90%;
 
 <p id="modalRarity"></p>
 
+<p id="modalDesc"></p>
+
 <p id="modalPrice"></p>
 
 <button onclick="addToCart()">Kosárba</button>
-
 <br><br>
-
 <button onclick="closeModal()">Bezár</button>
 
 </div>
 
 </div>
 
-<div class="modal hidden" id="adminLogin">
+<div class="modal" id="adminLogin">
 
 <div class="modalContent">
 
@@ -232,6 +231,7 @@ name:"Charizard GX",
 price:120,
 year:2019,
 rarity:"Ultra Rare",
+desc:"Erős tűz Pokémon kártya",
 img:"https://images.pokemontcg.io/base1/4.png"
 },
 {
@@ -239,6 +239,7 @@ name:"Pikachu",
 price:40,
 year:2021,
 rarity:"Common",
+desc:"Ikonikus Pokémon",
 img:"https://images.pokemontcg.io/base1/58.png"
 }
 ]
@@ -251,10 +252,13 @@ function renderCards(){
 
 let container=document.getElementById("cards")
 let search=document.getElementById("search").value.toLowerCase()
+let rarity=document.getElementById("rarityFilter").value
 
 container.innerHTML=""
 
-cards.filter(c=>c.name.toLowerCase().includes(search))
+cards
+.filter(c=>c.name.toLowerCase().includes(search))
+.filter(c=>rarity=="" || c.rarity==rarity)
 .forEach((c,i)=>{
 
 container.innerHTML+=`
@@ -283,26 +287,24 @@ function openCard(i){
 
 selected=cards[i]
 
-document.getElementById("modalName").innerText=selected.name
-document.getElementById("modalImg").src=selected.img
-document.getElementById("modalYear").innerText="Év: "+selected.year
-document.getElementById("modalRarity").innerText="Ritkaság: "+selected.rarity
-document.getElementById("modalPrice").innerText="Ár: $"+selected.price
+modalName.innerText=selected.name
+modalImg.src=selected.img
+modalYear.innerText="Év: "+selected.year
+modalRarity.innerText="Ritkaság: "+selected.rarity
+modalDesc.innerText=selected.desc
+modalPrice.innerText="Ár: $"+selected.price
 
-document.getElementById("cardModal").classList.remove("hidden")
+cardModal.style.display="flex"
 
 }
 
 function closeModal(){
-
-document.getElementById("cardModal").classList.add("hidden")
-
+cardModal.style.display="none"
 }
 
 function addToCart(){
 
 cart.push(selected)
-
 sales++
 
 localStorage.setItem("cart",JSON.stringify(cart))
@@ -313,13 +315,16 @@ updateCart()
 
 function toggleCart(){
 
-document.getElementById("cart").classList.toggle("hidden")
+let cartBox=document.getElementById("cart")
+
+cartBox.style.display=cartBox.style.display=="block"?"none":"block"
 
 }
 
 function updateCart(){
 
 let c=document.getElementById("cartItems")
+
 c.innerHTML=""
 
 let total=0
@@ -327,15 +332,15 @@ let total=0
 cart.forEach((item,i)=>{
 
 c.innerHTML+=`
-<p>
-${item.name} - $${item.price}
-<button onclick="removeItem(${i})">X</button>
-</p>
+<p>${item.name} - $${item.price}
+<button onclick="removeItem(${i})">X</button></p>
 `
 
 total+=Number(item.price)
 
 })
+
+total.innerText
 
 document.getElementById("total").innerText="Összesen: $"+total
 
@@ -356,44 +361,42 @@ updateCart()
 }
 
 function openAdmin(){
-
-document.getElementById("adminLogin").classList.remove("hidden")
-
+adminLogin.style.display="flex"
 }
 
 function loginAdmin(){
 
-let pass=document.getElementById("adminPass").value
+let pass=document.getElementById("adminPass").value.trim()
 
 if(pass==="pokemonadmin"){
 
-document.getElementById("adminLogin").classList.add("hidden")
-document.getElementById("adminPanel").classList.remove("hidden")
+adminLogin.style.display="none"
+adminPanel.style.display="block"
 
 }
 
 else{
-
 alert("Rossz jelszó")
-
 }
 
 }
 
 function addCard(){
 
-let n=document.getElementById("name").value
-let p=document.getElementById("price").value
-let y=document.getElementById("year").value
-let r=document.getElementById("rarity").value
-let i=document.getElementById("img").value
+let n=name.value
+let p=price.value
+let y=year.value
+let r=rarity.value
+let i=img.value
+let d=desc.value
 
 cards.push({
 name:n,
 price:p,
 year:y,
 rarity:r,
-img:i
+img:i,
+desc:d
 })
 
 renderCards()
