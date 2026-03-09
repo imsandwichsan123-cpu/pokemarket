@@ -2,36 +2,50 @@
 <html lang="hu">
 <head>
 <meta charset="UTF-8">
-<title>PokeMarket</title>
+<title>PokeMarket V2</title>
 
 <style>
 
 body{
-font-family:Arial;
 margin:0;
+font-family:Arial;
 background:#0f172a;
 color:white;
 }
 
 header{
 background:#020617;
-padding:20px;
+padding:15px 30px;
 display:flex;
 justify-content:space-between;
 align-items:center;
 }
 
 .logo{
-font-size:28px;
+font-size:26px;
 font-weight:bold;
+color:#38bdf8;
 }
 
-button{
-cursor:pointer;
+nav button{
+margin-left:10px;
+padding:8px 15px;
+border:none;
+border-radius:5px;
+background:#38bdf8;
 }
 
 .container{
 padding:40px;
+}
+
+.search{
+margin-bottom:30px;
+}
+
+.search input{
+padding:10px;
+width:250px;
 }
 
 .cards{
@@ -46,10 +60,12 @@ border-radius:15px;
 padding:15px;
 text-align:center;
 transition:0.3s;
+cursor:pointer;
 }
 
 .card:hover{
 transform:scale(1.05);
+box-shadow:0 0 15px #38bdf8;
 }
 
 .card img{
@@ -60,6 +76,11 @@ border-radius:10px;
 .price{
 color:#38bdf8;
 font-size:18px;
+}
+
+.rarity{
+font-size:14px;
+color:#facc15;
 }
 
 .cart{
@@ -93,25 +114,20 @@ align-items:center;
 background:#1e293b;
 padding:30px;
 border-radius:10px;
-width:300px;
+width:350px;
 text-align:center;
+}
+
+.admin{
+background:#020617;
+padding:20px;
+margin-top:40px;
 }
 
 input{
 padding:10px;
 margin:5px;
 width:90%;
-}
-
-.adminPanel{
-background:#020617;
-padding:20px;
-margin-top:40px;
-}
-
-.review{
-font-size:14px;
-color:#94a3b8;
 }
 
 </style>
@@ -123,29 +139,38 @@ color:#94a3b8;
 
 <div class="logo">PokeMarket</div>
 
-<div>
+<nav>
 
 <button onclick="toggleCart()">Kosár</button>
 <button onclick="openAdmin()">Admin</button>
 
-</div>
+</nav>
 
 </header>
 
 <div class="container">
 
+<div class="search">
+
+<input id="search" placeholder="Keresés..." oninput="renderCards()">
+
+</div>
+
 <div class="cards" id="cards"></div>
 
-<div class="adminPanel hidden" id="adminPanel">
+<div class="admin hidden" id="adminPanel">
 
 <h2>Admin Panel</h2>
 
 <input id="name" placeholder="Kártya neve">
 <input id="price" placeholder="Ár">
 <input id="year" placeholder="Év">
+<input id="rarity" placeholder="Ritkaság">
 <input id="img" placeholder="Kép URL">
 
 <button onclick="addCard()">Kártya hozzáadása</button>
+
+<h3 id="stats"></h3>
 
 </div>
 
@@ -171,11 +196,11 @@ color:#94a3b8;
 
 <p id="modalYear"></p>
 
+<p id="modalRarity"></p>
+
 <p id="modalPrice"></p>
 
-<p id="modalReview"></p>
-
-<button onclick="addToCartModal()">Kosárba</button>
+<button onclick="addToCart()">Kosárba</button>
 
 <br><br>
 
@@ -191,7 +216,7 @@ color:#94a3b8;
 
 <h2>Admin Login</h2>
 
-<input id="adminPass" type="password" placeholder="Jelszó">
+<input id="adminPass" type="password">
 
 <button onclick="loginAdmin()">Belépés</button>
 
@@ -201,32 +226,36 @@ color:#94a3b8;
 
 <script>
 
-let cards = [
+let cards=[
 {
 name:"Charizard GX",
 price:120,
 year:2019,
-img:"https://images.pokemontcg.io/base1/4.png",
-reviews:"★★★★★"
+rarity:"Ultra Rare",
+img:"https://images.pokemontcg.io/base1/4.png"
 },
 {
 name:"Pikachu",
 price:40,
 year:2021,
-img:"https://images.pokemontcg.io/base1/58.png",
-reviews:"★★★★"
+rarity:"Common",
+img:"https://images.pokemontcg.io/base1/58.png"
 }
 ]
 
-let cart = []
-let selectedCard=null
+let cart=JSON.parse(localStorage.getItem("cart"))||[]
+let selected=null
+let sales=0
 
 function renderCards(){
 
 let container=document.getElementById("cards")
+let search=document.getElementById("search").value.toLowerCase()
+
 container.innerHTML=""
 
-cards.forEach((c,i)=>{
+cards.filter(c=>c.name.toLowerCase().includes(search))
+.forEach((c,i)=>{
 
 container.innerHTML+=`
 
@@ -236,9 +265,9 @@ container.innerHTML+=`
 
 <h3>${c.name}</h3>
 
-<div class="price">$${c.price}</div>
+<div class="rarity">${c.rarity}</div>
 
-<div class="review">${c.reviews}</div>
+<div class="price">$${c.price}</div>
 
 </div>
 
@@ -252,13 +281,13 @@ renderCards()
 
 function openCard(i){
 
-selectedCard=cards[i]
+selected=cards[i]
 
-document.getElementById("modalName").innerText=selectedCard.name
-document.getElementById("modalImg").src=selectedCard.img
-document.getElementById("modalYear").innerText="Készült: "+selectedCard.year
-document.getElementById("modalPrice").innerText="Ár: $"+selectedCard.price
-document.getElementById("modalReview").innerText="Értékelés: "+selectedCard.reviews
+document.getElementById("modalName").innerText=selected.name
+document.getElementById("modalImg").src=selected.img
+document.getElementById("modalYear").innerText="Év: "+selected.year
+document.getElementById("modalRarity").innerText="Ritkaság: "+selected.rarity
+document.getElementById("modalPrice").innerText="Ár: $"+selected.price
 
 document.getElementById("cardModal").classList.remove("hidden")
 
@@ -270,9 +299,13 @@ document.getElementById("cardModal").classList.add("hidden")
 
 }
 
-function addToCartModal(){
+function addToCart(){
 
-cart.push(selectedCard)
+cart.push(selected)
+
+sales++
+
+localStorage.setItem("cart",JSON.stringify(cart))
 
 updateCart()
 
@@ -287,20 +320,38 @@ document.getElementById("cart").classList.toggle("hidden")
 function updateCart(){
 
 let c=document.getElementById("cartItems")
-
 c.innerHTML=""
 
 let total=0
 
-cart.forEach(item=>{
+cart.forEach((item,i)=>{
 
-c.innerHTML+=`<p>${item.name} - $${item.price}</p>`
+c.innerHTML+=`
+<p>
+${item.name} - $${item.price}
+<button onclick="removeItem(${i})">X</button>
+</p>
+`
 
-total+=item.price
+total+=Number(item.price)
 
 })
 
 document.getElementById("total").innerText="Összesen: $"+total
+
+document.getElementById("stats").innerText="Eladások: "+sales
+
+}
+
+updateCart()
+
+function removeItem(i){
+
+cart.splice(i,1)
+
+localStorage.setItem("cart",JSON.stringify(cart))
+
+updateCart()
 
 }
 
@@ -334,16 +385,15 @@ function addCard(){
 let n=document.getElementById("name").value
 let p=document.getElementById("price").value
 let y=document.getElementById("year").value
+let r=document.getElementById("rarity").value
 let i=document.getElementById("img").value
 
 cards.push({
-
 name:n,
 price:p,
 year:y,
-img:i,
-reviews:"★★★★★"
-
+rarity:r,
+img:i
 })
 
 renderCards()
