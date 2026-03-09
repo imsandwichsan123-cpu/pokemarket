@@ -2,10 +2,14 @@
 <html lang="hu">
 <head>
 <meta charset="UTF-8">
-<title>PokeMarket ULTRA</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PokeMarket V4 PRO</title>
+
+<!-- Favicon -->
+<link rel="icon" href="logo.png">
+<link rel="apple-touch-icon" href="logo.png">
 
 <style>
-
 body{
 margin:0;
 font-family:Arial;
@@ -123,6 +127,10 @@ margin-top:40px;
 display:none;
 }
 
+.review{
+color:#94a3b8;
+font-size:14px;
+}
 </style>
 </head>
 
@@ -166,6 +174,7 @@ display:none;
 <input id="rarity" placeholder="Ritkaság">
 <input id="img" placeholder="Kép URL">
 <input id="desc" placeholder="Leírás">
+<input id="rating" placeholder="Értékelés (★★★★★)">
 
 <button onclick="addCard()">Kártya hozzáadása</button>
 
@@ -199,6 +208,8 @@ display:none;
 
 <p id="modalDesc"></p>
 
+<p id="modalRating"></p>
+
 <p id="modalPrice"></p>
 
 <button onclick="addToCart()">Kosárba</button>
@@ -225,6 +236,40 @@ display:none;
 
 <script>
 
+let currency="$"
+let rate=1
+
+async function detectCurrency(){
+
+try{
+
+let res=await fetch("https://ipapi.co/json/")
+let data=await res.json()
+
+if(data.country==="HU"){
+currency="Ft"
+rate=360
+}
+
+else if(data.country==="JP"){
+currency="¥"
+rate=150
+}
+
+else{
+currency="$"
+rate=1
+}
+
+renderCards()
+updateCart()
+
+}catch{}
+
+}
+
+detectCurrency()
+
 let cards=[
 {
 name:"Charizard GX",
@@ -232,6 +277,7 @@ price:120,
 year:2019,
 rarity:"Ultra Rare",
 desc:"Erős tűz Pokémon kártya",
+rating:"★★★★★",
 img:"https://images.pokemontcg.io/base1/4.png"
 },
 {
@@ -240,6 +286,7 @@ price:40,
 year:2021,
 rarity:"Common",
 desc:"Ikonikus Pokémon",
+rating:"★★★★",
 img:"https://images.pokemontcg.io/base1/58.png"
 }
 ]
@@ -271,7 +318,9 @@ container.innerHTML+=`
 
 <div class="rarity">${c.rarity}</div>
 
-<div class="price">$${c.price}</div>
+<div class="price">${Math.round(c.price*rate)} ${currency}</div>
+
+<div class="review">${c.rating}</div>
 
 </div>
 
@@ -292,7 +341,8 @@ modalImg.src=selected.img
 modalYear.innerText="Év: "+selected.year
 modalRarity.innerText="Ritkaság: "+selected.rarity
 modalDesc.innerText=selected.desc
-modalPrice.innerText="Ár: $"+selected.price
+modalRating.innerText="Értékelés: "+selected.rating
+modalPrice.innerText="Ár: "+Math.round(selected.price*rate)+" "+currency
 
 cardModal.style.display="flex"
 
@@ -332,7 +382,7 @@ let total=0
 cart.forEach((item,i)=>{
 
 c.innerHTML+=`
-<p>${item.name} - $${item.price}
+<p>${item.name} - ${Math.round(item.price*rate)} ${currency}
 <button onclick="removeItem(${i})">X</button></p>
 `
 
@@ -340,10 +390,7 @@ total+=Number(item.price)
 
 })
 
-total.innerText
-
-document.getElementById("total").innerText="Összesen: $"+total
-
+document.getElementById("total").innerText="Összesen: "+Math.round(total*rate)+" "+currency
 document.getElementById("stats").innerText="Eladások: "+sales
 
 }
@@ -389,6 +436,7 @@ let y=year.value
 let r=rarity.value
 let i=img.value
 let d=desc.value
+let rating=window.rating.value
 
 cards.push({
 name:n,
@@ -396,7 +444,8 @@ price:p,
 year:y,
 rarity:r,
 img:i,
-desc:d
+desc:d,
+rating:rating
 })
 
 renderCards()
