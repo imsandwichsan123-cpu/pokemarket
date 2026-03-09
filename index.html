@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html>
-
 <head>
 
 <title>PokeMarket</title>
@@ -9,9 +8,8 @@
 
 body{
 font-family:Arial;
-background:#f2f2f2;
 margin:0;
-padding:0;
+background:#f2f2f2;
 }
 
 header{
@@ -24,22 +22,26 @@ header h1{
 margin:0;
 }
 
-.container{
-padding:20px;
-}
-
-.search{
-margin-bottom:20px;
+.topbar{
+display:flex;
+justify-content:space-between;
+padding:10px 20px;
+background:#3b4cca;
+color:white;
 }
 
 .search input{
 padding:10px;
-width:300px;
+width:250px;
+}
+
+.container{
+padding:20px;
 }
 
 .cards{
 display:grid;
-grid-template-columns:repeat(auto-fill,minmax(200px,1fr));
+grid-template-columns:repeat(auto-fill,minmax(220px,1fr));
 gap:20px;
 }
 
@@ -57,22 +59,32 @@ border-radius:10px;
 }
 
 button{
-background:#3b4cca;
-color:white;
 border:none;
 padding:10px;
 border-radius:5px;
 cursor:pointer;
+margin-top:5px;
 }
 
-.cart{
+.buy{
+background:#3b4cca;
+color:white;
+}
+
+.fav{
+background:#ffcb05;
+}
+
+.cartPanel{
 position:fixed;
-top:20px;
-right:20px;
+right:0;
+top:0;
+width:300px;
+height:100%;
 background:white;
-padding:10px;
-border-radius:10px;
-box-shadow:0 0 10px rgba(0,0,0,0.3);
+box-shadow:-3px 0 10px rgba(0,0,0,0.3);
+padding:20px;
+overflow:auto;
 }
 
 </style>
@@ -86,29 +98,38 @@ box-shadow:0 0 10px rgba(0,0,0,0.3);
 <p>Pokemon kártya webshop</p>
 </header>
 
-<div class="cart">
+<div class="topbar">
+
+<div class="search">
+<input type="text" id="search" placeholder="Kártya keresése..." onkeyup="searchCards()">
+</div>
+
+<div>
 Kosár: <span id="cartCount">0</span>
+<button onclick="toggleCart()">Kosár megnyitása</button>
+</div>
+
 </div>
 
 <div class="container">
-
-<div class="search">
-<input type="text" id="searchInput" placeholder="Kártya keresése..." onkeyup="searchCards()">
+<div class="cards" id="cardList"></div>
 </div>
 
-<div class="cards" id="cardList"></div>
+<div class="cartPanel" id="cartPanel" style="display:none">
+
+<h2>Kosár</h2>
+
+<div id="cartItems"></div>
+
+<h3 id="totalPrice"></h3>
+
+<button onclick="checkout()">Rendelés</button>
 
 </div>
 
 <script>
 
-let cards = [
-
-{
-name:"Pikachu",
-price:5000,
-img:"https://images.pokemontcg.io/base1/58.png"
-},
+let cards=[
 
 {
 name:"Charizard",
@@ -117,18 +138,31 @@ img:"https://images.pokemontcg.io/base1/4.png"
 },
 
 {
+name:"Pikachu",
+price:5000,
+img:"https://images.pokemontcg.io/base1/58.png"
+},
+
+{
 name:"Mewtwo",
 price:15000,
 img:"https://images.pokemontcg.io/base1/10.png"
+},
+
+{
+name:"Blastoise",
+price:20000,
+img:"https://images.pokemontcg.io/base1/2.png"
 }
 
 ]
 
-let cart = []
+let cart=[]
+let favorites=[]
 
 function displayCards(list){
 
-let container = document.getElementById("cardList")
+let container=document.getElementById("cardList")
 
 container.innerHTML=""
 
@@ -144,7 +178,9 @@ container.innerHTML+=`
 
 <p>${card.price} Ft</p>
 
-<button onclick="addToCart(${i})">Kosárba</button>
+<button class="buy" onclick="addToCart(${i})">Kosárba</button>
+
+<button class="fav" onclick="addFav(${i})">❤️</button>
 
 </div>
 
@@ -160,11 +196,63 @@ cart.push(cards[i])
 
 document.getElementById("cartCount").innerText=cart.length
 
+updateCart()
+
+}
+
+function addFav(i){
+
+favorites.push(cards[i])
+
+alert("Hozzáadva kedvencekhez")
+
+}
+
+function toggleCart(){
+
+let panel=document.getElementById("cartPanel")
+
+if(panel.style.display=="none"){
+panel.style.display="block"
+}else{
+panel.style.display="none"
+}
+
+}
+
+function updateCart(){
+
+let container=document.getElementById("cartItems")
+
+container.innerHTML=""
+
+let total=0
+
+cart.forEach(card=>{
+
+container.innerHTML+=`
+
+<p>${card.name} - ${card.price} Ft</p>
+
+`
+
+total+=card.price
+
+})
+
+document.getElementById("totalPrice").innerText="Összesen: "+total+" Ft"
+
+}
+
+function checkout(){
+
+alert("Rendelés elküldve! Fizetés: banki utalás.")
+
 }
 
 function searchCards(){
 
-let search=document.getElementById("searchInput").value.toLowerCase()
+let search=document.getElementById("search").value.toLowerCase()
 
 let filtered=cards.filter(card=>card.name.toLowerCase().includes(search))
 
@@ -177,5 +265,4 @@ displayCards(cards)
 </script>
 
 </body>
-
 </html>
