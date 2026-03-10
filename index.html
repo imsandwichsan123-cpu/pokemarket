@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
 <meta charset="UTF-8">
 <title>PokeMarket</title>
@@ -9,9 +9,9 @@
 <style>
 
 body{
-font-family:Arial;
 margin:0;
-background:#111;
+font-family:Arial;
+background:#0f0f0f;
 color:white;
 }
 
@@ -20,30 +20,36 @@ display:flex;
 justify-content:space-between;
 align-items:center;
 padding:20px;
-background:#1c1c1c;
+background:#181818;
 }
 
 .logo{
-font-size:28px;
+font-size:26px;
 font-weight:bold;
-color:#ffd900;
+color:#ffd800;
 }
 
 button{
-padding:10px 15px;
 border:none;
+padding:10px 15px;
 border-radius:6px;
 cursor:pointer;
 }
 
-.cartBtn{background:#ffd900;}
-.adminBtn{background:#555;color:white;}
+.cartBtn{background:#ffd800;}
+.adminBtn{background:#444;color:white;}
+
+.search{
+padding:8px;
+border-radius:6px;
+border:none;
+}
 
 .categories{
 display:flex;
 gap:10px;
 padding:10px;
-background:#191919;
+background:#151515;
 }
 
 .cat{
@@ -55,17 +61,17 @@ cursor:pointer;
 
 .grid{
 display:grid;
-grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
+grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
 gap:20px;
 padding:20px;
 }
 
 .card{
-background:#1e1e1e;
+background:#1c1c1c;
+padding:12px;
 border-radius:10px;
-padding:10px;
 text-align:center;
-transition:0.3s;
+transition:0.25s;
 }
 
 .card:hover{
@@ -97,7 +103,7 @@ align-items:center;
 background:#222;
 padding:20px;
 border-radius:10px;
-width:300px;
+width:320px;
 }
 
 .close{
@@ -130,8 +136,13 @@ right:0;
 <div class="logo">⚡ PokeMarket</div>
 
 <div>
-<button class="cartBtn" onclick="openCart()">🛒 Cart</button>
+
+<input class="search" placeholder="Search card..." onkeyup="search(this.value)">
+
+<button class="cartBtn" onclick="openCart()">🛒</button>
+
 <button class="adminBtn" onclick="openAdmin()">Admin</button>
+
 </div>
 
 </header>
@@ -154,13 +165,13 @@ right:0;
 
 <div id="cartItems"></div>
 
-<p>Total: $<span id="total">0</span></p>
+<h3>Total: $<span id="total">0</span></h3>
 
 <button onclick="closeCart()">Close</button>
 
 </div>
 
-<!-- ADMIN LOGIN -->
+<!-- ADMIN -->
 
 <div class="modal" id="adminModal">
 
@@ -173,6 +184,20 @@ right:0;
 <input type="password" id="adminPass" placeholder="Password">
 
 <button onclick="login()">Login</button>
+
+</div>
+
+</div>
+
+<!-- CARD INFO -->
+
+<div class="modal" id="infoModal">
+
+<div class="modalContent">
+
+<span class="close" onclick="closeInfo()">❌</span>
+
+<div id="infoContent"></div>
 
 </div>
 
@@ -191,15 +216,26 @@ name:"Pikachu V",
 price:15,
 type:"electric",
 stock:2,
-img:"https://images.pokemontcg.io/swshp/SWSH063.png"
+year:2020,
+img:"https://images.pokemontcg.io/swsh4/43.png"
 },
 
 {
-name:"Surfing Pikachu V",
-price:18,
+name:"Surfing Pikachu VMAX",
+price:25,
 type:"electric",
 stock:1,
-img:"https://images.pokemontcg.io/celebrations/8.png"
+year:2021,
+img:"https://images.pokemontcg.io/celebrations/9.png"
+},
+
+{
+name:"Flying Pikachu VMAX",
+price:26,
+type:"electric",
+stock:1,
+year:2021,
+img:"https://images.pokemontcg.io/celebrations/7.png"
 },
 
 {
@@ -207,6 +243,7 @@ name:"Pikachu GX",
 price:22,
 type:"electric",
 stock:1,
+year:2018,
 img:"https://images.pokemontcg.io/sm3/33.png"
 },
 
@@ -215,6 +252,7 @@ name:"Raichu GX",
 price:20,
 type:"electric",
 stock:1,
+year:2019,
 img:"https://images.pokemontcg.io/sm213/SM213.png"
 },
 
@@ -223,6 +261,7 @@ name:"Umbreon V",
 price:35,
 type:"dark",
 stock:1,
+year:2021,
 img:"https://images.pokemontcg.io/swsh7/94.png"
 },
 
@@ -231,6 +270,7 @@ name:"Pikachu & Zekrom GX",
 price:45,
 type:"electric",
 stock:1,
+year:2019,
 img:"https://images.pokemontcg.io/sm168/SM168.png"
 }
 
@@ -248,7 +288,7 @@ grid.innerHTML+=`
 
 <div class="card">
 
-<img src="${c.img}">
+<img src="${c.img}" onclick="info(${i})">
 
 <h3>${c.name}</h3>
 
@@ -266,17 +306,49 @@ grid.innerHTML+=`
 
 }
 
+function info(i){
+
+let c=cards[i]
+
+document.getElementById("infoContent").innerHTML=`
+
+<h2>${c.name}</h2>
+
+<img src="${c.img}" style="width:100%">
+
+<p>Price: $${c.price}</p>
+
+<p>Type: ${c.type}</p>
+
+<p>Year: ${c.year}</p>
+
+<p>Stock: ${c.stock}</p>
+
+`
+
+document.getElementById("infoModal").style.display="flex"
+
+}
+
+function closeInfo(){
+
+document.getElementById("infoModal").style.display="none"
+
+}
+
 function filter(type){
 
 if(type==="all") render(cards)
 
-else{
-
-let f=cards.filter(c=>c.type===type)
-
-render(f)
+else render(cards.filter(c=>c.type===type))
 
 }
+
+function search(text){
+
+let t=text.toLowerCase()
+
+render(cards.filter(c=>c.name.toLowerCase().includes(t)))
 
 }
 
@@ -350,7 +422,7 @@ let pass=document.getElementById("adminPass").value
 
 if(pass===adminPassword){
 
-alert("Admin panel coming soon")
+alert("Admin panel coming in V8")
 
 closeAdmin()
 
