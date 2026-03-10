@@ -4,8 +4,6 @@
 <meta charset="UTF-8">
 <title>PokeMarket</title>
 
-<link rel="icon" href="logo.png">
-
 <style>
 
 body{
@@ -13,50 +11,25 @@ margin:0;
 font-family:Arial;
 background:#0f0f0f;
 color:white;
+transition:0.3s;
+}
+
+.light{
+background:white;
+color:black;
 }
 
 header{
 display:flex;
 justify-content:space-between;
-align-items:center;
 padding:20px;
-background:#181818;
+background:#1a1a1a;
 }
 
 .logo{
-font-size:26px;
+font-size:24px;
 font-weight:bold;
 color:#ffd800;
-}
-
-button{
-border:none;
-padding:10px 15px;
-border-radius:6px;
-cursor:pointer;
-}
-
-.cartBtn{background:#ffd800;}
-.adminBtn{background:#444;color:white;}
-
-.search{
-padding:8px;
-border-radius:6px;
-border:none;
-}
-
-.categories{
-display:flex;
-gap:10px;
-padding:10px;
-background:#151515;
-}
-
-.cat{
-background:#333;
-padding:8px 12px;
-border-radius:6px;
-cursor:pointer;
 }
 
 .grid{
@@ -68,14 +41,15 @@ padding:20px;
 
 .card{
 background:#1c1c1c;
-padding:12px;
 border-radius:10px;
+padding:10px;
 text-align:center;
-transition:0.25s;
+transition:0.3s;
+transform-style:preserve-3d;
 }
 
 .card:hover{
-transform:scale(1.05);
+transform:rotateY(10deg) rotateX(10deg);
 }
 
 .card img{
@@ -83,31 +57,10 @@ width:100%;
 border-radius:6px;
 }
 
-.stock{
-color:#00ff88;
-}
-
-.modal{
-position:fixed;
-top:0;
-left:0;
-width:100%;
-height:100%;
-background:rgba(0,0,0,0.7);
-display:none;
-justify-content:center;
-align-items:center;
-}
-
-.modalContent{
-background:#222;
-padding:20px;
-border-radius:10px;
-width:320px;
-}
-
-.close{
-float:right;
+button{
+padding:8px 12px;
+border:none;
+border-radius:6px;
 cursor:pointer;
 }
 
@@ -126,6 +79,25 @@ transition:0.3s;
 right:0;
 }
 
+.modal{
+position:fixed;
+top:0;
+left:0;
+width:100%;
+height:100%;
+display:none;
+background:rgba(0,0,0,0.7);
+justify-content:center;
+align-items:center;
+}
+
+.modalContent{
+background:#222;
+padding:20px;
+border-radius:10px;
+width:320px;
+}
+
 </style>
 </head>
 
@@ -137,23 +109,14 @@ right:0;
 
 <div>
 
-<input class="search" placeholder="Search card..." onkeyup="search(this.value)">
-
-<button class="cartBtn" onclick="openCart()">🛒</button>
-
-<button class="adminBtn" onclick="openAdmin()">Admin</button>
+<button onclick="toggleTheme()">🌙</button>
+<button onclick="openCart()">🛒</button>
+<button onclick="openLogin()">Login</button>
+<button onclick="openAdmin()">Admin</button>
 
 </div>
 
 </header>
-
-<div class="categories">
-
-<div class="cat" onclick="filter('all')">All</div>
-<div class="cat" onclick="filter('electric')">⚡ Electric</div>
-<div class="cat" onclick="filter('dark')">🌑 Dark</div>
-
-</div>
 
 <div class="grid" id="cards"></div>
 
@@ -161,7 +124,7 @@ right:0;
 
 <div class="cartPanel" id="cart">
 
-<h2>🛒 Cart</h2>
+<h2>Cart</h2>
 
 <div id="cartItems"></div>
 
@@ -171,33 +134,37 @@ right:0;
 
 </div>
 
+<!-- LOGIN -->
+
+<div class="modal" id="loginModal">
+
+<div class="modalContent">
+
+<h3>User Login</h3>
+
+<input id="userName" placeholder="Username"><br><br>
+
+<input id="userPass" type="password" placeholder="Password"><br><br>
+
+<button onclick="loginUser()">Login</button>
+
+<button onclick="registerUser()">Register</button>
+
+</div>
+
+</div>
+
 <!-- ADMIN -->
 
 <div class="modal" id="adminModal">
 
 <div class="modalContent">
 
-<span class="close" onclick="closeAdmin()">❌</span>
-
 <h3>Admin Login</h3>
 
-<input type="password" id="adminPass" placeholder="Password">
+<input id="adminPass" type="password">
 
-<button onclick="login()">Login</button>
-
-</div>
-
-</div>
-
-<!-- CARD INFO -->
-
-<div class="modal" id="infoModal">
-
-<div class="modalContent">
-
-<span class="close" onclick="closeInfo()">❌</span>
-
-<div id="infoContent"></div>
+<button onclick="adminLogin()">Login</button>
 
 </div>
 
@@ -207,6 +174,8 @@ right:0;
 
 let adminPassword="admin123"
 
+let users=[]
+
 let cart=[]
 
 let cards=[
@@ -214,89 +183,54 @@ let cards=[
 {
 name:"Pikachu V",
 price:15,
-type:"electric",
 stock:2,
-year:2020,
 img:"https://images.pokemontcg.io/swsh4/43.png"
 },
 
 {
 name:"Surfing Pikachu VMAX",
 price:25,
-type:"electric",
 stock:1,
-year:2021,
 img:"https://images.pokemontcg.io/celebrations/9.png"
 },
 
 {
 name:"Flying Pikachu VMAX",
 price:26,
-type:"electric",
 stock:1,
-year:2021,
 img:"https://images.pokemontcg.io/celebrations/7.png"
-},
-
-{
-name:"Pikachu GX",
-price:22,
-type:"electric",
-stock:1,
-year:2018,
-img:"https://images.pokemontcg.io/sm3/33.png"
-},
-
-{
-name:"Raichu GX",
-price:20,
-type:"electric",
-stock:1,
-year:2019,
-img:"https://images.pokemontcg.io/sm213/SM213.png"
 },
 
 {
 name:"Umbreon V",
 price:35,
-type:"dark",
 stock:1,
-year:2021,
 img:"https://images.pokemontcg.io/swsh7/94.png"
-},
-
-{
-name:"Pikachu & Zekrom GX",
-price:45,
-type:"electric",
-stock:1,
-year:2019,
-img:"https://images.pokemontcg.io/sm168/SM168.png"
 }
 
 ]
 
-function render(list){
+function render(){
 
 let grid=document.getElementById("cards")
 
 grid.innerHTML=""
 
-list.forEach((c,i)=>{
+cards.forEach((c,i)=>{
 
 grid.innerHTML+=`
 
 <div class="card">
 
-<img src="${c.img}" onclick="info(${i})">
+<img src="${c.img}">
 
 <h3>${c.name}</h3>
 
 <p>$${c.price}</p>
 
-<p class="stock">Stock: ${c.stock}</p>
+<p>Stock: ${c.stock}</p>
 
-<button onclick="add(${i})">Add to cart</button>
+<button onclick="addCart(${i})">Add to cart</button>
 
 </div>
 
@@ -306,53 +240,7 @@ grid.innerHTML+=`
 
 }
 
-function info(i){
-
-let c=cards[i]
-
-document.getElementById("infoContent").innerHTML=`
-
-<h2>${c.name}</h2>
-
-<img src="${c.img}" style="width:100%">
-
-<p>Price: $${c.price}</p>
-
-<p>Type: ${c.type}</p>
-
-<p>Year: ${c.year}</p>
-
-<p>Stock: ${c.stock}</p>
-
-`
-
-document.getElementById("infoModal").style.display="flex"
-
-}
-
-function closeInfo(){
-
-document.getElementById("infoModal").style.display="none"
-
-}
-
-function filter(type){
-
-if(type==="all") render(cards)
-
-else render(cards.filter(c=>c.type===type))
-
-}
-
-function search(text){
-
-let t=text.toLowerCase()
-
-render(cards.filter(c=>c.name.toLowerCase().includes(t)))
-
-}
-
-function add(i){
+function addCart(i){
 
 if(cards[i].stock<=0){
 
@@ -368,7 +256,7 @@ cards[i].stock--
 
 updateCart()
 
-render(cards)
+render()
 
 }
 
@@ -404,27 +292,43 @@ document.getElementById("cart").classList.remove("open")
 
 }
 
+function toggleTheme(){
+
+document.body.classList.toggle("light")
+
+}
+
+function openLogin(){
+
+document.getElementById("loginModal").style.display="flex"
+
+}
+
+function loginUser(){
+
+alert("User logged in")
+
+}
+
+function registerUser(){
+
+alert("User registered")
+
+}
+
 function openAdmin(){
 
 document.getElementById("adminModal").style.display="flex"
 
 }
 
-function closeAdmin(){
-
-document.getElementById("adminModal").style.display="none"
-
-}
-
-function login(){
+function adminLogin(){
 
 let pass=document.getElementById("adminPass").value
 
 if(pass===adminPassword){
 
-alert("Admin panel coming in V8")
-
-closeAdmin()
+alert("Admin panel coming soon")
 
 }else{
 
@@ -434,7 +338,7 @@ alert("Wrong password")
 
 }
 
-render(cards)
+render()
 
 </script>
 
